@@ -30,7 +30,7 @@ DOMAINS=$(cat <<-EOF
 EOF
 )
 
-  CERTIFICATES=`./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k curl -p "/api/v0/certificates/generate" -x POST -d "$DOMAINS"`
+  CERTIFICATES=`./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k curl -p "/api/v0/rsa_certificates" -x POST -d "$DOMAINS"`
 
   export SSL_CERT=`echo $CERTIFICATES | jq '.certificate'`
   export SSL_PRIVATE_KEY=`echo $CERTIFICATES | jq '.key'`
@@ -57,9 +57,9 @@ CF_PROPERTIES=$(cat <<-EOF
     "value": "$SYSLOG_PROTOCOL"
   },
   ".properties.networking_point_of_entry": {
-    "value": "external_ssl"
+    "value": "ha_proxy"
   },
-  ".properties.networking_point_of_entry.external_ssl.ssl_rsa_certificate": {
+  ".properties.networking_point_of_entry.ha_proxy.ssl_rsa_certificate": {
     "value": {
       "cert_pem": $SSL_CERT,
       "private_key_pem": $SSL_PRIVATE_KEY

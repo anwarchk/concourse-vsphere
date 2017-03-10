@@ -30,16 +30,16 @@ resources:
 - name: concourse-vsphere
   type: git
   source:
-    uri: git@github.com:rahul-kj/concourse-vsphere
+    uri: git@github.com:anwarchk/concourse-vsphere
     branch: master
     private_key: {{github_private_key}}
 
-- name: customer-repo
-  type: git
-  source:
-    uri: git@github.com:rahul-kj/sample-customer-repo
-    branch: master
-    private_key: {{github_private_key}}
+# - name: customer-repo
+#   type: git
+#   source:
+#     uri: git@github.com:anwarchk/sample-customer-repo
+#     branch: master
+#     private_key: {{github_private_key}}
 
 - name: pivnet-opsman-product
   type: pivnet
@@ -378,31 +378,31 @@ jobs:
       JMX_SECURITY_LOGGING: {{jmx_security_logging}}
       JMX_USE_SSL: {{jmx_use_ssl}}
 
-- name: pre-install-step
-  plan:
-  - aggregate:
-    - get: customer-repo
-      trigger: true
-    - get: om-cli
-      globs: om-linux
-      passed: [config-elastic-runtime-tile, config-metrics-tile]
-
-  - task: pre-step
-    file: customer-repo/tasks/pre-step/task.yml
-    params:
-      OPS_MGR_HOST: {{om_host}}
-      OPS_MGR_USR: {{om_usr}}
-      OPS_MGR_PWD: {{om_pwd}}
+# - name: pre-install-step
+#   plan:
+#   - aggregate:
+#     - get: customer-repo
+#       trigger: true
+#     - get: om-cli
+#       globs: om-linux
+#       passed: [config-elastic-runtime-tile, config-metrics-tile]
+#
+#   - task: pre-step
+#     file: customer-repo/tasks/pre-step/task.yml
+#     params:
+#       OPS_MGR_HOST: {{om_host}}
+#       OPS_MGR_USR: {{om_usr}}
+#       OPS_MGR_PWD: {{om_pwd}}
 
 - name: product-apply-changes
   plan:
   - aggregate:
     - get: concourse-vsphere
-      passed: [upload-metrics-tile]
+      passed: [config-metrics-tile,config-elastic-runtime-tile]
       trigger: true
     - get: om-cli
       globs: om-linux
-      passed: [pre-install-step]
+      passed: [config-metrics-tile,config-elastic-runtime-tile]
 
   - task: apply-changes
     file: concourse-vsphere/tasks/apply-changes/task.yml
@@ -435,32 +435,32 @@ jobs:
       OPS_MGR_USR: {{om_usr}}
       OPS_MGR_PWD: {{om_pwd}}
 
-- name: update-metrics-ip-in-bosh
-  plan:
-  - aggregate:
-    - get: concourse-vsphere
-      trigger: true
-      passed: [product-apply-changes]
-    - get: om-cli
-      globs: om-linux
-      passed: [product-apply-changes]
+# - name: update-metrics-ip-in-bosh
+#   plan:
+#   - aggregate:
+#     - get: concourse-vsphere
+#       trigger: true
+#       passed: [product-apply-changes]
+#     - get: om-cli
+#       globs: om-linux
+#       passed: [product-apply-changes]
 
-  - task: update-metrics-ip
-    file: concourse-vsphere/tasks/update-metrics-ip/task.yml
-    params:
-      OPS_MGR_HOST: {{om_host}}
-      OPS_MGR_USR: {{om_usr}}
-      OPS_MGR_PWD: {{om_pwd}}
+  # - task: update-metrics-ip
+  #   file: concourse-vsphere/tasks/update-metrics-ip/task.yml
+  #   params:
+  #     OPS_MGR_HOST: {{om_host}}
+  #     OPS_MGR_USR: {{om_usr}}
+  #     OPS_MGR_PWD: {{om_pwd}}
 
 - name: post-apply-changes
   plan:
   - aggregate:
     - get: concourse-vsphere
       trigger: true
-      passed: [disable-errands, update-metrics-ip-in-bosh]
+      passed: [disable-errands]
     - get: om-cli
       globs: om-linux
-      passed: [disable-errands, update-metrics-ip-in-bosh, post-install-step]
+      passed: [disable-errands]
 
   - task: apply-changes
     file: concourse-vsphere/tasks/apply-changes/task.yml
@@ -469,17 +469,17 @@ jobs:
       OPS_MGR_USR: {{om_usr}}
       OPS_MGR_PWD: {{om_pwd}}
 
-- name: post-install-step
-  plan:
-  - aggregate:
-    - get: customer-repo
-      trigger: true
-    - get: om-cli
-      globs: om-linux
-      passed: [product-apply-changes]
-  - task: post-step
-    file: customer-repo/tasks/post-step/task.yml
-    params:
-      OPS_MGR_HOST: {{om_host}}
-      OPS_MGR_USR: {{om_usr}}
-      OPS_MGR_PWD: {{om_pwd}}
+# - name: post-install-step
+#   plan:
+#   - aggregate:
+#     - get: customer-repo
+#       trigger: true
+#     - get: om-cli
+#       globs: om-linux
+#       passed: [product-apply-changes]
+#   - task: post-step
+#     file: customer-repo/tasks/post-step/task.yml
+#     params:
+#       OPS_MGR_HOST: {{om_host}}
+#       OPS_MGR_USR: {{om_usr}}
+#       OPS_MGR_PWD: {{om_pwd}}
