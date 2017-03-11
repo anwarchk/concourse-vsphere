@@ -59,7 +59,7 @@ CF_PROPERTIES=$(cat <<-EOF
   ".properties.networking_point_of_entry": {
     "value": "ha_proxy"
   },
-  ".properties.networking_point_of_entry.ha_proxy.ssl_rsa_certificate": {
+  ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
     "value": {
       "cert_pem": $SSL_CERT,
       "private_key_pem": $SSL_PRIVATE_KEY
