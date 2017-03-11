@@ -46,12 +46,16 @@ resources:
   source:
     api_token: {{pivnet_token}}
     product_slug: ops-manager
+    product_version: 1.9.*
+    sort_by: semver
 
 - name: pivnet-er-product
   type: pivnet
   source:
     api_token: {{pivnet_token}}
     product_slug: elastic-runtime
+    product_version: 1.9.*
+    sort_by: semver
 
 - name: pivnet-metrics-product
   type: pivnet
@@ -60,7 +64,6 @@ resources:
     product_slug: ops-metrics
 
 jobs:
-
 # - name: delete-opsmgr
 #   plan:
 #   - aggregate:
@@ -328,6 +331,10 @@ jobs:
       DOPPLER_INSTANCES: {{doppler_instances}}
       LOGGREGATOR_TC_INSTANCES: {{loggregator_traffic_controller_instances}}
       TCP_ROUTER_INSTANCES: {{tcp_router_instances}}
+      UAA_USER_ACCOUNT_STORE_TYPE: {{uaa_user_account_store}}
+      APPS_MANAGER_COMPANY_NAME: {{apps_manager_company_name}}
+      ALLOW_APPS_SSH_ACCESS: {{allow_app_ssh_access}}
+      ENABLE_TCP_ROUTING_RESERVED_PORTS: {{enable_tcp_routing_reserved_ports}}
 
 - name: upload-metrics-tile
   plan:
@@ -435,22 +442,22 @@ jobs:
       OPS_MGR_USR: {{om_usr}}
       OPS_MGR_PWD: {{om_pwd}}
 
-# - name: update-metrics-ip-in-bosh
-#   plan:
-#   - aggregate:
-#     - get: concourse-vsphere
-#       trigger: true
-#       passed: [product-apply-changes]
-#     - get: om-cli
-#       globs: om-linux
-#       passed: [product-apply-changes]
+- name: update-metrics-ip-in-bosh
+  plan:
+  - aggregate:
+    - get: concourse-vsphere
+      trigger: true
+      passed: [product-apply-changes]
+    - get: om-cli
+      globs: om-linux
+      passed: [product-apply-changes]
 
-  # - task: update-metrics-ip
-  #   file: concourse-vsphere/tasks/update-metrics-ip/task.yml
-  #   params:
-  #     OPS_MGR_HOST: {{om_host}}
-  #     OPS_MGR_USR: {{om_usr}}
-  #     OPS_MGR_PWD: {{om_pwd}}
+  - task: update-metrics-ip
+    file: concourse-vsphere/tasks/update-metrics-ip/task.yml
+    params:
+      OPS_MGR_HOST: {{om_host}}
+      OPS_MGR_USR: {{om_usr}}
+      OPS_MGR_PWD: {{om_pwd}}
 
 - name: post-apply-changes
   plan:

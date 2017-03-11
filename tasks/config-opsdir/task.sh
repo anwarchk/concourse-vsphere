@@ -58,7 +58,7 @@ NETWORK_CONFIGURATION=$(cat <<-EOF
           "dns": "$INFRA_NW_DNS",
           "gateway": "$INFRA_NW_GATEWAY",
           "availability_zone_names": [
-            "INFRA-AZ", "DEPLOYMENT-AZ", "SERVICES-AZ"        
+            "INFRA-AZ", "DEPLOYMENT-AZ", "SERVICES-AZ"
           ]
         }
       ]
