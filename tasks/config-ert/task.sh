@@ -110,36 +110,6 @@ CF_PROPERTIES=$(cat <<-EOF
   ".properties.uaa": {
     "value": "$UAA_USER_ACCOUNT_STORE_TYPE"
   },
-  ".properties.uaa.ldap.url": {
-    "value": "$LDAP_URL"
-  },
-  ".properties.uaa.ldap.credentials": {
-    "value": {
-      "identity": "$LDAP_USER",
-      "password": "$LDAP_PWD"
-    }
-  },
-  ".properties.uaa.ldap.search_base": {
-    "value": "$SEARCH_BASE"
-  },
-  ".properties.uaa.ldap.search_filter": {
-    "value": "$SEARCH_FILTER"
-  },
-  ".properties.uaa.ldap.group_search_base": {
-    "value": "$GROUP_SEARCH_BASE"
-  },
-  ".properties.uaa.ldap.group_search_filter": {
-    "value": "$GROUP_SEARCH_FILTER"
-  },
-  ".properties.uaa.ldap.mail_attribute_name": {
-    "value": "$MAIL_ATTR_NAME"
-  },
-  ".properties.uaa.ldap.first_name_attribute": {
-    "value": "$FIRST_NAME_ATTR"
-  },
-  ".properties.uaa.ldap.last_name_attribute": {
-    "value": "$LAST_NAME_ATTR"
-  },
   ".cloud_controller.system_domain": {
     "value": "$SYSTEM_DOMAIN"
   },
@@ -193,6 +163,9 @@ CF_PROPERTIES=$(cat <<-EOF
   },
   ".diego_brain.static_ips": {
     "value": "$SSH_STATIC_IPS"
+  },
+  ".properties.tcp_routing.enable.reservable_ports": {
+    "value": "$ENABLE_TCP_ROUTING_RESERVED_PORTS"
   }
 }
 EOF
