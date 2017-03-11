@@ -211,7 +211,7 @@ CF_RESOURCES=$(cat <<-EOF
     "instance_type": {"id": "automatic"},
     "instances" : $CLOUD_CONTROLLER_INSTANCES
   },
-  "haproxy": {
+  "ha_proxy": {
     "instance_type": {"id": "automatic"},
     "instances" : $HA_PROXY_INSTANCES
   },
