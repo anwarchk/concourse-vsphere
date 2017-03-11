@@ -68,9 +68,6 @@ CF_PROPERTIES=$(cat <<-EOF
   ".properties.tcp_routing": {
     "value": "$TCP_ROUTING"
   },
-  ".properties.tcp_routing.enable.reservable_ports": {
-    "value": "$TCP_ROUTING_PORTS"
-  },
   ".properties.route_services": {
     "value": "$ROUTE_SERVICES"
   },
@@ -163,9 +160,6 @@ CF_PROPERTIES=$(cat <<-EOF
   },
   ".diego_brain.static_ips": {
     "value": "$SSH_STATIC_IPS"
-  },
-  ".properties.tcp_routing.enable.reservable_ports": {
-    "value": "$ENABLE_TCP_ROUTING_RESERVED_PORTS"
   }
 }
 EOF
