@@ -57,7 +57,7 @@ CF_PROPERTIES=$(cat <<-EOF
     "value": "$SYSLOG_PROTOCOL"
   },
   ".properties.networking_point_of_entry": {
-    "value": "ha_proxy"
+    "value": "haproxy"
   },
   ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
     "value": {
@@ -108,7 +108,7 @@ CF_PROPERTIES=$(cat <<-EOF
     "value": "disable"
   },
   ".properties.uaa": {
-    "value": "ldap"
+    "value": "$UAA_USER_ACCOUNT_STORE_TYPE"
   },
   ".properties.uaa.ldap.url": {
     "value": "$LDAP_URL"
@@ -153,7 +153,7 @@ CF_PROPERTIES=$(cat <<-EOF
     "value": 1000
   },
   ".cloud_controller.allow_app_ssh_access": {
-    "value": true
+    "value": "$ALLOW_APPS_SSH_ACCESS"
   },
   ".cloud_controller.security_event_logging_enabled": {
     "value": true
@@ -189,7 +189,7 @@ CF_PROPERTIES=$(cat <<-EOF
     "value": "$TCP_ROUTER_STATIC_IPS"
   },
   ".push-apps-manager.company_name": {
-    "value": "Homelab"
+    "value": "$APPS_MANAGER_COMPANY_NAME"
   },
   ".diego_brain.static_ips": {
     "value": "$SSH_STATIC_IPS"
@@ -244,7 +244,7 @@ CF_RESOURCES=$(cat <<-EOF
     "instance_type": {"id": "automatic"},
     "instances" : $CLOUD_CONTROLLER_INSTANCES
   },
-  "ha_proxy": {
+  "haproxy": {
     "instance_type": {"id": "automatic"},
     "instances" : $HA_PROXY_INSTANCES
   },
