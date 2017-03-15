@@ -1,6 +1,6 @@
 # PCF 1.9 Install on VSphere using Concourse CI
 
-A PCF 1.9 install Concourse pipeline based on the work by @rahul-kj : https://github.com/rahul-kj/concourse-vsphere
+A PCF 1.9 install Concourse pipeline based on the work by @rahulkj : https://github.com/rahul-kj/concourse-vsphere
 
 Refer to the /pipelines README for detailed pipeline specific instructions.
 

@@ -7,16 +7,16 @@ image_resource:
   source: {repository: rjain/buildbox}
 
 params:
+  OPS_MGR_HOST:
+  OPS_MGR_USR:
+  OPS_MGR_PWD:
   PIVNET_API_TOKEN:
 
 inputs:
-  - name: pivnet-opsman-product
-  - name: pivnet-er-product
-  - name: pivnet-metrics-product
+  - name: pivnet-product
   - name: concourse-vsphere
   - name: om-cli
   - name: pivnet-cli
-  - name: govc
 
 run:
-  path: concourse-vsphere/tasks/download-products/task.sh
+  path: concourse-vsphere/tasks/upload-product/task.sh

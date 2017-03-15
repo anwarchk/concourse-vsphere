@@ -3,6 +3,11 @@ chmod +x om-cli/om-linux
 
 CMD=./om-cli/om-linux
 
+function fn_get_azs {
+     local azs_csv=$1
+     echo $azs_csv | awk -F "," -v quote='"' -v OFS='", "' '$1=$1 {print quote $0 quote}'
+}
+
 IAAS_CONFIGURATION=$(cat <<-EOF
 {
   "vcenter_host": "$VCENTER_HOST",
@@ -43,6 +48,11 @@ AZ_CONFIGURATION=$(cat <<-EOF
 EOF
 )
 
+INFRA_AZS=$(fn_get_azs $INFRA_NW_AZS)
+DEPLOYMENT_AZS=$(fn_get_azs $DEPLOYMENT_NW_AZS)
+SERVICES_AZS=$(fn_get_azs $SERVICES_NW_AZS)
+DYNAMIC_SERVICES_AZS=$(fn_get_azs $DYNAMIC_SERVICES_NW_AZS)
+
 NETWORK_CONFIGURATION=$(cat <<-EOF
 {
   "icmp_checks_enabled": true,
@@ -58,7 +68,7 @@ NETWORK_CONFIGURATION=$(cat <<-EOF
           "dns": "$INFRA_NW_DNS",
           "gateway": "$INFRA_NW_GATEWAY",
           "availability_zone_names": [
-            "INFRA-AZ", "DEPLOYMENT-AZ", "SERVICES-AZ"
+            $INFRA_AZS
           ]
         }
       ]

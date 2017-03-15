@@ -9,13 +9,29 @@ PRODUCT_VERSION=`echo $CF_RELEASE | cut -d"|" -f3 | tr -d " "`
 
 ./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k stage-product -p $PRODUCT_NAME -v $PRODUCT_VERSION
 
+function fn_ert_balanced_azs {
+  local ERT_AZS
+  for v in $(echo $1 | sed "s/,/ /g")
+  do
+    if [[ -z "$ERT_AZS" ]]; then
+      ERT_AZS={\"name\":\"$v\"}
+    else
+      ERT_AZS+=,{\"name\":\"$v\"}
+    fi
+  done
+
+  echo $ERT_AZS
+}
+
+ERT_AZS=$(fn_ert_balanced_azs $DEPLOYMENT_NW_AZS)
+
 CF_NETWORK=$(cat <<-EOF
 {
   "singleton_availability_zone": {
-    "name": "$AZ_2"
+    "name": "$ERT_SINGLETON_JOB_AZ"
   },
   "other_availability_zones": [
-    { "name": "$AZ_2" }
+    $ERT_AZS
   ],
   "network": {
     "name": "$NETWORK_NAME"
@@ -35,10 +51,8 @@ EOF
   export SSL_CERT=`echo $CERTIFICATES | jq '.certificate'`
   export SSL_PRIVATE_KEY=`echo $CERTIFICATES | jq '.key'`
 
-  echo "SSL_CERT is" $SSL_CERT
-  echo "SSL_PRIVATE_KEY is" $SSL_PRIVATE_KEY
-else
-  echo "I should be generating certs"
+  echo "Using self signed certificates generated using Ops Manager..."
+
 fi
 
 
@@ -46,15 +60,6 @@ CF_PROPERTIES=$(cat <<-EOF
 {
   ".properties.logger_endpoint_port": {
     "value": "$LOGGREGATOR_ENDPOINT_PORT"
-  },
-  ".properties.syslog_host": {
-    "value": "$SYSLOG_HOST"
-  },
-  ".properties.syslog_port": {
-    "value": "$SYSLOG_PORT"
-  },
-  ".properties.syslog_protocol": {
-    "value": "$SYSLOG_PROTOCOL"
   },
   ".properties.networking_point_of_entry": {
     "value": "haproxy"
@@ -76,27 +81,6 @@ CF_PROPERTIES=$(cat <<-EOF
   },
   ".properties.security_acknowledgement": {
     "value": "X"
-  },
-  ".properties.smtp_from": {
-    "value": "$SMTP_FROM"
-  },
-  ".properties.smtp_address": {
-    "value": "$SMTP_ADDRESS"
-  },
-  ".properties.smtp_port": {
-    "value": "$SMTP_PORT"
-  },
-  ".properties.smtp_credentials": {
-    "value": {
-      "identity": "$SMTP_USER",
-      "password": "$SMTP_PWD"
-    }
-  },
-  ".properties.smtp_enable_starttls_auto": {
-    "value": true
-  },
-  ".properties.smtp_auth_mechanism": {
-    "value": "$SMTP_AUTH_MECHANISM"
   },
   ".properties.system_blobstore": {
     "value": "internal"
@@ -260,3 +244,131 @@ EOF
 )
 
 ./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k configure-product -n cf -p "$CF_PROPERTIES" -pn "$CF_NETWORK" -pr "$CF_RESOURCES"
+
+if [[ ! -z "$LDAP_URL" ]]; then
+
+echo "Configuring LDAP in ERT..."
+CF_LDAP_PROPERTIES=$(cat <<-EOF
+{
+  ".properties.uaa": {
+    "value": "ldap"
+  },
+  ".properties.uaa.ldap.url": {
+    "value": "$LDAP_URL"
+  },
+  ".properties.uaa.ldap.credentials": {
+    "value": {
+      "identity": "$LDAP_USER",
+      "password": "$LDAP_PWD"
+    }
+  },
+  ".properties.uaa.ldap.search_base": {
+    "value": "$SEARCH_BASE"
+  },
+  ".properties.uaa.ldap.search_filter": {
+    "value": "$SEARCH_FILTER"
+  },
+  ".properties.uaa.ldap.group_search_base": {
+    "value": "$GROUP_SEARCH_BASE"
+  },
+  ".properties.uaa.ldap.group_search_filter": {
+    "value": "$GROUP_SEARCH_FILTER"
+  },
+  ".properties.uaa.ldap.mail_attribute_name": {
+    "value": "$MAIL_ATTR_NAME"
+  },
+  ".properties.uaa.ldap.first_name_attribute": {
+    "value": "$FIRST_NAME_ATTR"
+  },
+  ".properties.uaa.ldap.last_name_attribute": {
+    "value": "$LAST_NAME_ATTR"
+  }
+}
+EOF
+)
+
+./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k configure-product -n cf -p "$CF_LDAP_PROPERTIES"
+
+fi
+
+
+if [[ ! -z "$SYSLOG_HOST" ]]; then
+
+echo "Configuring Syslog in ERT..."
+
+CF_SYSLOG_PROPERTIES=$(cat <<-EOF
+{
+  ".properties.syslog_host": {
+    "value": "$SYSLOG_HOST"
+  },
+  ".properties.syslog_port": {
+    "value": "$SYSLOG_PORT"
+  },
+  ".properties.syslog_protocol": {
+    "value": "$SYSLOG_PROTOCOL"
+  }
+}
+EOF
+)
+
+./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k configure-product -n cf -p "$CF_SYSLOG_PROPERTIES"
+
+fi
+
+if [[ ! -z "$SMTP_ADDRESS" ]]; then
+
+echo "Configuraing SMTP in ERT..."
+
+CF_SMTP_PROPERTIES=$(cat <<-EOF
+{
+  ".properties.smtp_from": {
+    "value": "$SMTP_FROM"
+  },
+  ".properties.smtp_address": {
+    "value": "$SMTP_ADDRESS"
+  },
+  ".properties.smtp_port": {
+    "value": "$SMTP_PORT"
+  },
+  ".properties.smtp_credentials": {
+    "value": {
+      "identity": "$SMTP_USER",
+      "password": "$SMTP_PWD"
+    }
+  },
+  ".properties.smtp_enable_starttls_auto": {
+    "value": true
+  },
+  ".properties.smtp_auth_mechanism": {
+    "value": "$SMTP_AUTH_MECHANISM"
+  }
+}
+EOF
+)
+
+./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k configure-product -n cf -p "$CF_SMTP_PROPERTIES"
+
+fi
+
+if [[ $HA_PROXY_INSTANCES -ge 1 ]]; then
+
+echo "Terminating SSL on HAProxy"
+
+CF_HAPROXY_PROPERTIES=$(cat <<-EOF
+{
+  ".properties.networking_point_of_entry": {
+    "value": "haproxy"
+  },
+  ".properties.networking_point_of_entry.haproxy.ssl_rsa_certificate": {
+    "value": {
+      "cert_pem": $SSL_CERT,
+      "private_key_pem": $SSL_PRIVATE_KEY
+    }
+  }
+}
+EOF
+)
+
+./om-cli/om-linux -t https://$OPS_MGR_HOST -u $OPS_MGR_USR -p $OPS_MGR_PWD -k configure-product -n cf -p "$CF_HAPROXY_PROPERTIES"
+
+fi
